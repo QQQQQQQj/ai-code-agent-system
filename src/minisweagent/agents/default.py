@@ -1,11 +1,17 @@
 """Basic agent class. See https://mini-swe-agent.com/latest/advanced/control_flow/ for visual explanation
 or https://minimal-agent.com for a tutorial on the basic building principles.
+
+This module implements the core Agent class that orchestrates the interaction between
+language models and execution environments. It provides a simple yet powerful framework
+for building AI-driven software engineering agents.
 """
 
 import json
 import logging
 import traceback
+import time
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from jinja2 import StrictUndefined, Template
 from pydantic import BaseModel
