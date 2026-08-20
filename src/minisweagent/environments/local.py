@@ -118,13 +118,25 @@ class LocalEnvironment:
             self._track_command(command, result.returncode, duration, len(output))
 
         except subprocess.TimeoutExpired as e:
+            partial_output = e.output or e.stdout or ""
+            if isinstance(partial_output, bytes):
+                partial_output = partial_output.decode("utf-8", errors="replace")
+            timeout_message = f"Command timed out after {timeout or self.config.timeout} seconds"
+            output = partial_output
+            if output and not output.endswith("\n"):
+                output += "\n"
+            output += timeout_message
+            if len(output) > self.config.max_output_size:
+                output = output[: self.config.max_output_size] + (
+                    f"\n... [Output truncated, exceeded {self.config.max_output_size} bytes]"
+                )
             exec_result = {
-                "output": f"Command timed out after {timeout or self.config.timeout} seconds",
+                "output": output,
                 "returncode": -1,
                 "exception_info": f"Timeout error: {str(e)}",
                 "extra": {"exception_type": "TimeoutExpired"},
             }
-            self._track_command(command, -1, time.time() - start_time, 0)
+            self._track_command(command, -1, time.time() - start_time, len(output))
         except Exception as e:
             raw_output = getattr(e, "output", None)
             raw_output = (
