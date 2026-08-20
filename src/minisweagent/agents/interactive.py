@@ -68,17 +68,17 @@ class InteractiveAgent(DefaultAgent):
                     }
                     self.add_messages(msg)
                     return msg
-        try:
-            with console.status("Waiting for the LM to respond..."):
-                return super().query()
-        except LimitsExceeded:
-            console.print(
-                f"Limits exceeded. Limits: {self.config.step_limit} steps, ${self.config.cost_limit}.\n"
-                f"Current spend: {self.n_calls} steps, ${self.cost:.2f}."
-            )
-            self.config.step_limit = int(input("New step limit: "))
-            self.config.cost_limit = float(input("New cost limit: "))
-            return super().query()
+        while True:
+            try:
+                with console.status("Waiting for the LM to respond..."):
+                    return super().query()
+            except LimitsExceeded:
+                console.print(
+                    f"Limits exceeded. Limits: {self.config.step_limit} steps, ${self.config.cost_limit}.\n"
+                    f"Current spend: {self.n_calls} steps, ${self.cost:.2f}."
+                )
+                self.config.step_limit = int(input("New step limit: "))
+                self.config.cost_limit = float(input("New cost limit: "))
 
     def step(self) -> list[dict]:
         # Override the step method to handle user interruption

@@ -4,6 +4,9 @@ patch.txt
 exit_statuses*.yaml
 preds.json
 *.traj.json
+# Deterministic end-to-end fixtures required by the CI test suite.
+!tests/test_data/local.traj.json
+!tests/test_data/github_issue.traj.json
 .env
 traj.json
 .claude/**
@@ -185,4 +188,3 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
-

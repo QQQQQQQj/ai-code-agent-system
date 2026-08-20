@@ -49,10 +49,25 @@ dependencies = [
 
 [project.optional-dependencies]
 full = [
-    "mini-swe-agent[dev]",
+    # Keep the full extra self-contained so installing this fork does not also
+    # install the upstream distribution with the same minisweagent package.
+    "pytest",
+    "pytest-cov",
+    "pytest-asyncio",
+    "pytest-xdist",
+    "pre-commit",
+    "ruff",
+    "mkdocs-include-markdown-plugin",
+    "mkdocstrings[python]>=0.18",
+    "mike",
+    "mkdocs-material",
+    "mkdocs-glightbox",
+    "mkdocs-redirects",
+    "portkey-ai",
     "swe-rex>=1.4.0",
-    "mini-swe-agent[modal]",
-    "mini-swe-agent[contree]",
+    "modal",
+    "boto3",
+    "contree-sdk>=0.2.0",
 ]
 
 modal = [
@@ -271,6 +286,7 @@ disable = [
 ]
 
 [tool.pytest.ini_options]
+testpaths = ["tests"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = [
