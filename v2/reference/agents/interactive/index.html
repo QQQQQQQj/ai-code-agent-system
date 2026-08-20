@@ -2914,17 +2914,17 @@
                     <span class="p">}</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">add_messages</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                     <span class="k">return</span> <span class="n">msg</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">console</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="s2">"Waiting for the LM to respond..."</span><span class="p">):</span>
-                <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
-        <span class="k">except</span> <span class="n">LimitsExceeded</span><span class="p">:</span>
-            <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">"Limits exceeded. Limits: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_limit</span><span class="si">}</span><span class="s2"> steps, $</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cost_limit</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
-                <span class="sa">f</span><span class="s2">"Current spend: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_calls</span><span class="si">}</span><span class="s2"> steps, $</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">."</span>
-            <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"New step limit: "</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cost_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"New cost limit: "</span><span class="p">))</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">console</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="s2">"Waiting for the LM to respond..."</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">LimitsExceeded</span><span class="p">:</span>
+                <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"Limits exceeded. Limits: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_limit</span><span class="si">}</span><span class="s2"> steps, $</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cost_limit</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="sa">f</span><span class="s2">"Current spend: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_calls</span><span class="si">}</span><span class="s2"> steps, $</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">."</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"New step limit: "</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cost_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"New cost limit: "</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">step</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
         <span class="c1"># Override the step method to handle user interruption</span>
@@ -3394,17 +3394,17 @@
                 <span class="p">}</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">add_messages</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">msg</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">console</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="s2">"Waiting for the LM to respond..."</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
-    <span class="k">except</span> <span class="n">LimitsExceeded</span><span class="p">:</span>
-        <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">"Limits exceeded. Limits: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_limit</span><span class="si">}</span><span class="s2"> steps, $</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cost_limit</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
-            <span class="sa">f</span><span class="s2">"Current spend: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_calls</span><span class="si">}</span><span class="s2"> steps, $</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">."</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"New step limit: "</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cost_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"New cost limit: "</span><span class="p">))</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">console</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="s2">"Waiting for the LM to respond..."</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">LimitsExceeded</span><span class="p">:</span>
+            <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Limits exceeded. Limits: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_limit</span><span class="si">}</span><span class="s2"> steps, $</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cost_limit</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"Current spend: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_calls</span><span class="si">}</span><span class="s2"> steps, $</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cost</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">."</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">step_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"New step limit: "</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">cost_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="s2">"New cost limit: "</span><span class="p">))</span>
 </code></pre></div></td></tr></tbody></table></div>
             </details>
     </div>
