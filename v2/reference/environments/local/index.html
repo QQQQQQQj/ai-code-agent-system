@@ -3306,13 +3306,25 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_track_command</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
 
         <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">partial_output</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">output</span> <span class="ow">or</span> <span class="n">e</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="s2">""</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">partial_output</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="n">partial_output</span> <span class="o">=</span> <span class="n">partial_output</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
+            <span class="n">timeout_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Command timed out after </span><span class="si">{</span><span class="n">timeout</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">timeout</span><span class="si">}</span><span class="s2"> seconds"</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">partial_output</span>
+            <span class="k">if</span> <span class="n">output</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">output</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">):</span>
+                <span class="n">output</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="n">timeout_message</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_output_size</span><span class="p">:</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_output_size</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">... [Output truncated, exceeded </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_output_size</span><span class="si">}</span><span class="s2"> bytes]"</span>
+                <span class="p">)</span>
             <span class="n">exec_result</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">"output"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Command timed out after </span><span class="si">{</span><span class="n">timeout</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">timeout</span><span class="si">}</span><span class="s2"> seconds"</span><span class="p">,</span>
+                <span class="s2">"output"</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span>
                 <span class="s2">"returncode"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                 <span class="s2">"exception_info"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Timeout error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
                 <span class="s2">"extra"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"exception_type"</span><span class="p">:</span> <span class="s2">"TimeoutExpired"</span><span class="p">},</span>
             <span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_track_command</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_track_command</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">raw_output</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s2">"output"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">raw_output</span> <span class="o">=</span> <span class="p">(</span>
@@ -4224,7 +4236,19 @@ for robust agent operation in development and production scenarios.</p>
 <span class="normal">139</span>
 <span class="normal">140</span>
 <span class="normal">141</span>
-<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">cwd</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">cwd</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Execute a command in the local environment with safety checks.</span>
 
@@ -4274,13 +4298,25 @@ for robust agent operation in development and production scenarios.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_track_command</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
 
     <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">partial_output</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">output</span> <span class="ow">or</span> <span class="n">e</span><span class="o">.</span><span class="n">stdout</span> <span class="ow">or</span> <span class="s2">""</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">partial_output</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="n">partial_output</span> <span class="o">=</span> <span class="n">partial_output</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">"replace"</span><span class="p">)</span>
+        <span class="n">timeout_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"Command timed out after </span><span class="si">{</span><span class="n">timeout</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">timeout</span><span class="si">}</span><span class="s2"> seconds"</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">partial_output</span>
+        <span class="k">if</span> <span class="n">output</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">output</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="n">timeout_message</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_output_size</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_output_size</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">... [Output truncated, exceeded </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">max_output_size</span><span class="si">}</span><span class="s2"> bytes]"</span>
+            <span class="p">)</span>
         <span class="n">exec_result</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">"output"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Command timed out after </span><span class="si">{</span><span class="n">timeout</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">timeout</span><span class="si">}</span><span class="s2"> seconds"</span><span class="p">,</span>
+            <span class="s2">"output"</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span>
             <span class="s2">"returncode"</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
             <span class="s2">"exception_info"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"Timeout error: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
             <span class="s2">"extra"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"exception_type"</span><span class="p">:</span> <span class="s2">"TimeoutExpired"</span><span class="p">},</span>
         <span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_track_command</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_track_command</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">raw_output</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s2">"output"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">raw_output</span> <span class="o">=</span> <span class="p">(</span>
@@ -4320,15 +4356,15 @@ for robust agent operation in development and production scenarios.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/minisweagent/environments/local.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tbody><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tbody><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_stats</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Get execution statistics."""</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="s2">"total_executions"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">execution_count</span><span class="p">,</span>
@@ -4359,8 +4395,8 @@ for robust agent operation in development and production scenarios.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/minisweagent/environments/local.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tbody><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">203</span>
-<span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_template_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+              <div class="highlight"><table class="highlighttable"><tbody><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">215</span>
+<span class="normal">216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_template_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
     <span class="k">return</span> <span class="n">recursive_merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span> <span class="n">platform</span><span class="o">.</span><span class="n">uname</span><span class="p">()</span><span class="o">.</span><span class="n">_asdict</span><span class="p">(),</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div></td></tr></tbody></table></div>
             </details>
@@ -4384,15 +4420,15 @@ for robust agent operation in development and production scenarios.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/minisweagent/environments/local.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tbody><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tbody><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">{</span>
         <span class="s2">"info"</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">"config"</span><span class="p">:</span> <span class="p">{</span>
